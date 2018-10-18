@@ -4,7 +4,7 @@ package ${basePackage}.service;
 /**
  * Created by auto.
  * @author ${author}
- * @date   ${date}
+ * @data   ${data}
  */
 public interface ${modelNameUpperCamel}Service {
 

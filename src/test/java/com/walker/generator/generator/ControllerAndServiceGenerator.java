@@ -38,7 +38,7 @@ public class ControllerAndServiceGenerator {
 
     private static final String PACKAGE_PATH_SERVICE_IMPL = packageConvertPath(SERVICE_IMPL_PACKAGE);//生成的Service实现存放路径
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ControllerAndServiceGenerator.class);
+    private static final Logger logger = LoggerFactory.getLogger(ControllerAndServiceGenerator.class);
 
     /**
      * freemarker 配置
@@ -84,6 +84,7 @@ public class ControllerAndServiceGenerator {
                 file.getParentFile().mkdirs();
             }
             configuration.getTemplate("service.ftl").process(params, new FileWriter(file));
+            logger.info("======{}Service.java 生成成功======", modelNameUpperCamel);
             if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
@@ -92,9 +93,10 @@ public class ControllerAndServiceGenerator {
                 implFile.getParentFile().mkdirs();
             }
             configuration.getTemplate("service-impl.ftl").process(params, new FileWriter(implFile));
+            logger.info("======{}ServiceImpl.java 生成成功======", modelNameUpperCamel);
         } catch (Exception e) {
-            LOGGER.error("");
-            e.printStackTrace();
+            logger.error("======生成Service失败======", e);
+            throw new RuntimeException("生成Service失败", e);
         }
     }
 
