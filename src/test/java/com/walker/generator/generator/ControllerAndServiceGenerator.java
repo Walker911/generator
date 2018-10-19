@@ -15,9 +15,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.walker.generator.common.ProjectConstant.BASE_PACKAGE;
-import static com.walker.generator.common.ProjectConstant.SERVICE_IMPL_PACKAGE;
-import static com.walker.generator.common.ProjectConstant.SERVICE_PACKAGE;
+import static com.walker.generator.common.ProjectConstant.*;
 
 /**
  * 生成 Controller and Service
@@ -37,6 +35,8 @@ public class ControllerAndServiceGenerator {
     private static final String PACKAGE_PATH_SERVICE = packageConvertPath(SERVICE_PACKAGE);//生成的Service存放路径
 
     private static final String PACKAGE_PATH_SERVICE_IMPL = packageConvertPath(SERVICE_IMPL_PACKAGE);//生成的Service实现存放路径
+
+    private static final String PACKAGE_PATH_CONTROLLER = packageConvertPath(CONTROLLER_PACKAGE);//生成的Controller存放路径
 
     private static final Logger logger = LoggerFactory.getLogger(ControllerAndServiceGenerator.class);
 
@@ -62,8 +62,17 @@ public class ControllerAndServiceGenerator {
     public static void generateController(String tableName, String modelName) {
         try {
             Configuration configuration = getConfiguration();
+            String modelNameUpperCamel = StringUtils.isBlank(modelName) ? tableNameConvertUpperCamel(tableName) : modelName;
+            String modelNameLowerCamel = StringUtils.isBlank(modelName) ? tableNameConvertLowerCamel(tableName) : tableNameConvertLowerCamel(modelName);
             Map<String, Object> params = assembleParamMap(tableName, modelName);
+            File file = new File(PROJECT_PATH + JAVA_PATH + PACKAGE_PATH_CONTROLLER + "Controller.java");
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+            configuration.getTemplate("").process(params, new FileWriter(file));
+            logger.info("====== {}Controller生成完成 ======", "");
         } catch (Exception e) {
+            logger.error("====== 生成Controller失败 ======", e);
             throw new RuntimeException("生成Controller失败", e);
         }
     }
@@ -84,7 +93,7 @@ public class ControllerAndServiceGenerator {
                 file.getParentFile().mkdirs();
             }
             configuration.getTemplate("service.ftl").process(params, new FileWriter(file));
-            logger.info("======{}Service.java 生成成功======", modelNameUpperCamel);
+            logger.info("====== {}Service.java 生成成功 ======", modelNameUpperCamel);
             if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
@@ -93,9 +102,9 @@ public class ControllerAndServiceGenerator {
                 implFile.getParentFile().mkdirs();
             }
             configuration.getTemplate("service-impl.ftl").process(params, new FileWriter(implFile));
-            logger.info("======{}ServiceImpl.java 生成成功======", modelNameUpperCamel);
+            logger.info("====== {}ServiceImpl.java 生成成功 ======", modelNameUpperCamel);
         } catch (Exception e) {
-            logger.error("======生成Service失败======", e);
+            logger.error("====== 生成Service失败 ======", e);
             throw new RuntimeException("生成Service失败", e);
         }
     }
@@ -110,6 +119,10 @@ public class ControllerAndServiceGenerator {
         params.put("modelNameUpperCamel", modelNameUpperCamel);
         params.put("modelNameLowerCamel", "");
         return params;
+    }
+
+    private static String tableNameConvertLowerCamel(String tableName) {
+        return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, tableName.toLowerCase());
     }
 
     private static String tableNameConvertUpperCamel(String tableName) {
@@ -132,8 +145,13 @@ public class ControllerAndServiceGenerator {
 
 
     public static void main(String[] args) {
-        System.out.println(tableNameConvertUpperCamel("t_user"));
-        generateService("t_user", "User");
+        System.err.println(tableNameConvertUpperCamel("t_user"));
+        System.err.println(tableNameConvertLowerCamel("ModelName"));
+        System.err.println(nameConvertLowerCamel("ModelName"));
+        System.err.println(nameConvertLowerCamel("t_user"));
     }
 
+    private static String nameConvertLowerCamel(String name) {
+        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name);
+    }
 }
